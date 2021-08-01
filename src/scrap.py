@@ -2,9 +2,7 @@
 # @Time     : 2021/07/29 15:07
 # @Author   : Ranshi
 # @File     : scrap.py
-# @Doc      : 顶层抽象类设计，封装直接下载、多进程下载、多线程下载、多协程下载
-# TODO 使用多协程进行下载
-
+# @Doc      : 顶层抽象类设计，封装直接下载、多进程下载、多线程下载
 from abc import abstractclassmethod
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool
@@ -53,8 +51,6 @@ class Scrap:
                 self.download_th(links, bar, _max)
             elif kind[:2] == 'pr':
                 self.download_pr(links, bar, _max)
-            elif kind[:2] == 'co':
-                self.download_co(links, bar)
             else:
                 return False
         return True
@@ -68,7 +64,7 @@ class Scrap:
         """
         for link in links:
             self.handle_link(link=link, **self.link_kwargs)
-            next_bar(bar())
+            next_bar(bar)
 
     def download_th(self, links: Iterable, bar: Callable, _max: int = 32):
         """使用多进程进行下载
@@ -111,9 +107,6 @@ class Scrap:
             for task in tasks:
                 task.get()
                 next_bar(bar)
-
-    def download_co(self, links: Iterable, bar: Callable):
-        ...
 
     @abstractclassmethod
     def scrap(self) -> List[str]:

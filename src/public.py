@@ -2,14 +2,46 @@
 # @Time     : 2021/7/1 13: 44
 # @Author   : Ranshi
 # @File     : public.py
+import sys
+
+sys.path.append('/Users/rs/Documents/projects/python_project/rs-get')
 
 import argparse
+import asyncio
 import os
 
 import aiohttp
 import requests
+from bs4 import BeautifulSoup
 
 from src.config import HEADERS, PROXYS
+
+
+def get_parser() -> argparse.Namespace:
+    """获取命令行参数
+
+  Returns:
+      argparse.ArgumentParser: 命令行参数对象
+  """
+    parser = argparse.ArgumentParser(
+        prog='rs-get',
+        description='get something !',
+    )
+    parser.add_argument(
+        type=str,
+        help='url',
+        dest='url',
+    )
+    parser.add_argument(
+        '-k',
+        '--kind',
+        type=str,
+        default='',
+        help='kind',
+        choices=['th', 'pr', ''],
+        dest='kind',
+    )
+    return parser.parse_args()
 
 
 def exists_or_create(path: str) -> None:
@@ -19,7 +51,7 @@ def exists_or_create(path: str) -> None:
         path (str): 文件夹的路径
     """
     if not os.path.exists(path):
-        print(f'save path: {path} is not exists, but I have made it.')
+        print(f'Making dir : {path} ...')
         os.makedirs(path)
 
 
@@ -34,44 +66,3 @@ def request(url: str) -> requests.models.Response:
   """
     res = requests.get(url, headers=HEADERS, proxies=PROXYS)
     return res
-
-
-def get_parser() -> argparse.Namespace:
-    """获取命令行参数
-
-  Returns:
-      argparse.ArgumentParser: 命令行参数对象
-  """
-    parser = argparse.ArgumentParser(
-        prog='rs-downImage',
-        description='download images',
-    )
-    parser.add_argument(
-        type=str,
-        help='url',
-        dest='url',
-    )
-    parser.add_argument(
-        '-k',
-        '--kind',
-        type=str,
-        default='',
-        help='kind',
-        choices=['th', 'pr', 'co', ''],
-        dest='kind',
-    )
-    return parser.parse_args()
-
-
-async def fetch_content(url: str):
-    """aiohttp异步请求封装
-
-    Args:
-        url (str): 请求url
-
-    Returns:
-        [type]: 返回的响应对象
-    """
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            return await response.text()
