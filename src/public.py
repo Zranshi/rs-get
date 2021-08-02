@@ -2,17 +2,10 @@
 # @Time     : 2021/7/1 13: 44
 # @Author   : Ranshi
 # @File     : public.py
-import sys
-
-sys.path.append('/Users/rs/Documents/projects/python_project/rs-get')
-
 import argparse
-import asyncio
 import os
 
-import aiohttp
 import requests
-from bs4 import BeautifulSoup
 
 from src.config import HEADERS, PROXYS
 

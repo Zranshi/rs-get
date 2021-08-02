@@ -7,17 +7,17 @@ from src.sites import SITES_MAP
 
 
 def site_handler(url: str, kind: str = '') -> bool:
-  site = url.split('/')[2]
-  if site in SITES_MAP:
-    spider = SITES_MAP[site](url=url)
-    if not spider.handle(kind=kind):
-      return False
-  else:
-    return False
-  return True
+    site = url.split('/')[2]
+    if site in SITES_MAP:
+        spider = SITES_MAP[site](url=url)
+        if not spider.handle(kind=kind):
+            return False
+    else:
+        return False
+    return True
 
 
 def run():
-  args = get_parser()
-  if not site_handler(args.url, args.kind):
-    print('sorry, this website is not supported this moment.')
+    args = get_parser()
+    if not site_handler(args.url, args.kind):
+        print('sorry, this website is not supported this moment.')
