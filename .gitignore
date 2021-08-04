@@ -1,7 +1,8 @@
 ### project
 /.idea/*
 /src/sites/*
-
+!/src/sites/template.py
+/src/db/config.py
 
 ### macOS template
 # General
