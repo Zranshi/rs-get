@@ -3,13 +3,13 @@
 # @Author   : Ranshi
 # @File     : main.py
 # @Doc      : 程序运行入口
-from src.config.cli_args import get_parser
 from src.api.tool_func import time_log
+from src.config.cli_args import get_parser
 from src.sites import SITES_MAP
 
 
 @time_log
-def site_handler(url: str, kind: str = '') -> bool:
+def site_handler(url: str, kind: str = '', max_c: int = 32) -> bool:
     """为不同的网站非配不同的子类
 
     Args:
@@ -22,14 +22,13 @@ def site_handler(url: str, kind: str = '') -> bool:
     site = url.split('/')[2]
     if site in SITES_MAP:
         spider = SITES_MAP[site](url=url)
-        if not spider.handle(kind=kind):
-            return False
+        spider.start(kind=kind, max_c=max_c)
+        return True
     else:
         return False
-    return True
 
 
 if __name__ == '__main__':
     args = get_parser()
-    if not site_handler(url=args.url, kind=args.kind):
+    if not site_handler(url=args.url, kind=args.kind, max_c=args.max_c):
         print('sorry, this website is not supported this moment.')

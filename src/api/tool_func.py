@@ -4,6 +4,7 @@
 # @File     : tool_func.py
 # @Doc      : 工具函数
 import os
+
 import requests
 from src.config.request import HEADERS, PROXYS
 
@@ -44,3 +45,7 @@ def time_log(func, dot_num: int = 2):
         return res
 
     return wrapper
+
+
+def safe_dir_name(name: str) -> str:
+    return name.strip().translate(str.maketrans('/\\?*:"<>| ', '----------'))

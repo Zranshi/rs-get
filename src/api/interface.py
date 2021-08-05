@@ -12,7 +12,7 @@ from alive_progress import alive_bar
 
 
 class Scrap:
-    def __init__(self, url: str, handle_link: Callable, **link_kwargs: dict):
+    def __init__(self, url: str, **link_kwargs):
         """初始化一个爬取对象
 
         Args:
@@ -21,18 +21,14 @@ class Scrap:
             **link_kwargs: 处理函数的参数
         """
         self.url = url
-        self.handle_link = handle_link
         self.link_kwargs = link_kwargs
 
-    def handle(self, kind: str, _max: int = 32) -> bool:
+    def start(self, kind: str, max_c: int = 32):
         """入口函数，根据命令行参数选择下载方式
 
         Args:
             kind: 下载方式
-            _max: 最大线程/进程数. Defaults to 32.
-
-        Returns: 输入是否合法
-
+            max_c: 最大线程/进程数. Defaults to 32.
         """
         print('links collecting...')
         links = list(self.scrap())
@@ -40,9 +36,9 @@ class Scrap:
             if kind == '':
                 self.download(links, bar)
             elif kind[:2] == 'th':
-                self.download_th(links, bar, _max)
+                self.download_th(links, bar, max_c)
             elif kind[:2] == 'pr':
-                self.download_pr(links, bar, _max)
+                self.download_pr(links, bar, max_c)
             else:
                 return False
         return True
@@ -56,46 +52,45 @@ class Scrap:
 
         """
         for link in links:
-            self.handle_link(link=link, **self.link_kwargs)
+            self.handle(link=link, **self.link_kwargs)
             bar()
 
-    def download_th(self, links: Iterable, bar: Callable, _max: int = 32):
+    def download_th(self, links: Iterable, bar: Callable, max_c: int):
         """使用多进程进行下载
 
         Args:
             links: 链接的列表
             bar: 进度条对象
-            _max: 线程池大小. Defaults to 32.
+            max_c: 线程池大小. Defaults to 32.
 
         """
-        with ThreadPoolExecutor(max_workers=_max) as pool:
+        with ThreadPoolExecutor(max_workers=max_c) as pool:
             tasks = []
             for link in links:
-                tasks.append(
-                    pool.submit(
-                        self.handle_link,
-                        link=link,
-                        **self.link_kwargs,
-                    ))
+                tasks.append(pool.submit(
+                    self.handle,
+                    link=link,
+                    **self.link_kwargs,
+                ))
             for task in tasks:
                 task.result()
                 bar()
 
-    def download_pr(self, links: Iterable, bar: Callable, _max: int = 32):
+    def download_pr(self, links: Iterable, bar: Callable, max_c: int):
         """使用多进程进行下载
 
         Args:
             links: 链接的列表
             bar: 进度条对象
-            _max: 进程池大小. Defaults to 32.
+            max_c: 进程池大小. Defaults to 32.
 
         """
         tasks = []
-        with Pool(processes=_max) as pool:
+        with Pool(processes=max_c) as pool:
             for link in links:
                 tasks.append(
                     pool.apply_async(
-                        func=self.handle_link,
+                        func=self.handle,
                         args=(link, ),
                         kwds=self.link_kwargs,
                     ))
@@ -103,11 +98,14 @@ class Scrap:
                 task.get()
                 bar()
 
-    @classmethod
-    def scrap(cls) -> List[str]:
+    def scrap(self) -> List[str]:
         """从主页面中获取所有需要的资源，并返回所有需要处理的links
 
         Returns: 返回链接列表
 
         """
         return []
+
+    @staticmethod
+    def handle(link: str, **kwargs):
+        ...

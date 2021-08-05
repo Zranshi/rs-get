@@ -11,4 +11,4 @@ from src.config.db import Db
 
 def get_db_session():
     return sessionmaker(bind=create_engine(
-        f'mysql+pymysql://{Db.user}:{Db.pwd}@{Db.host}:{Db.port}/{Db.db_name}'))()
+        f'mysql+pymysql://{Db.user}:{Db.pwd}@{Db.ip}:{Db.port}/{Db.db_name}'))()

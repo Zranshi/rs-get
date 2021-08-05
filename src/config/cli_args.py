@@ -7,7 +7,7 @@ import argparse
 
 
 def get_parser() -> argparse.Namespace:
-    """获取命令行参数
+    """获取设置的命令行参数
 
     Returns:命令行参数对象
 
@@ -18,16 +18,27 @@ def get_parser() -> argparse.Namespace:
     )
     parser.add_argument(
         type=str,
-        help='url',
+        help='Request entry link.',
         dest='url',
     )
     parser.add_argument(
         '-k',
-        '--kind',
         type=str,
         default='',
-        help='kind',
+        help='Download ways.',
         choices=['th', 'pr', ''],
         dest='kind',
+    )
+    parser.add_argument(
+        '-m',
+        type=int,
+        default=32,
+        help='Maximum concurrent number.',
+        dest='max_c',
+    )
+    parser.add_argument(
+        '--app',
+        help='Start with application.',
+        action='store_true'
     )
     return parser.parse_args()

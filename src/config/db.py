@@ -3,10 +3,8 @@
 # @Author   : Ranshi
 # @File     : db.py
 # @Doc      : 数据库配置
-
-
 class Db:
-    host = '127.0.0.1'
+    ip = '127.0.0.1'
     user = 'root'
     pwd = 'root'
     db_name = 'rs-get'
