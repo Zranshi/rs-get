@@ -7,4 +7,4 @@
 from datetime import date
 
 DATE = date.today().strftime("%Y.%m.%d")
-ROOT_PATH = '/Users/rs/Downloads/rs-files/'
+ROOT_PATH = "/Users/rs/Downloads/rs-files/"

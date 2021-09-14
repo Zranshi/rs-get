@@ -6,23 +6,25 @@
 import os
 
 import requests
-from src.config.request import HEADERS, PROXYS
+from src.config.request import HEADERS, PROXY
 
 
 def exists_or_create(path: str) -> None:
-    """是否存在文件夹，如果不存在则创建文件夹
+    """
+    是否存在文件夹，如果不存在则创建文件夹
 
     Args:
         path: 文件夹的路径
 
     """
     if not os.path.exists(path):
-        print(f'Making dir : {path} ...')
+        print(f"Making dir : {path} ...")
         os.makedirs(path)
 
 
 def request(url: str) -> requests.models.Response:
-    """封装的请求，设置了请求头和代理
+    """
+    封装的请求，设置了请求头和代理
 
     Args:
         url: url网址
@@ -30,7 +32,7 @@ def request(url: str) -> requests.models.Response:
     Returns: 响应对象
 
     """
-    res = requests.get(url, headers=HEADERS, proxies=PROXYS)
+    res = requests.get(url, headers=HEADERS, proxies=PROXY)
     return res
 
 
@@ -40,12 +42,14 @@ def time_log(func, dot_num: int = 2):
     def wrapper(*args, **kwargs):
         start_time = time()
         res = func(*args, **kwargs)
-        stop_time = time()
-        print(f'This task took a total of {round(stop_time-start_time, dot_num)} seconds')
+        during_time = time() - start_time
+        print(
+            f"This task took a total of {round(during_time, dot_num)} seconds"
+        )
         return res
 
     return wrapper
 
 
 def safe_dir_name(name: str) -> str:
-    return name.strip().translate(str.maketrans('/\\?*:"<>| ', '----------'))
+    return name.strip().translate(str.maketrans('/\\?*:"<>| ', "----------"))

@@ -3,6 +3,7 @@
 /src/sites/*
 !/src/sites/template.py
 /src/db/config.py
+src/config/db.py
 
 ### macOS template
 # General

@@ -6,6 +6,7 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool
+from threading import Semaphore
 from typing import Callable, Iterable, List
 
 from alive_progress import alive_bar
@@ -13,38 +14,42 @@ from alive_progress import alive_bar
 
 class Scrap:
     def __init__(self, url: str, **link_kwargs):
-        """初始化一个爬取对象
+        """
+        初始化一个爬取对象
 
         Args:
             url: 爬取的url地址
-            handle_link: 处理函数
             **link_kwargs: 处理函数的参数
         """
         self.url = url
         self.link_kwargs = link_kwargs
 
     def start(self, kind: str, max_c: int = 32):
-        """入口函数，根据命令行参数选择下载方式
+        """
+        入口函数，根据命令行参数选择下载方式
 
         Args:
             kind: 下载方式
             max_c: 最大线程/进程数. Defaults to 32.
         """
-        print('links collecting...')
+        print("links collecting...")
         links = list(self.scrap())
-        with alive_bar(len(links), theme='ascii', title='downloading...') as bar:
-            if kind == '':
+        with alive_bar(
+            len(links), theme="ascii", title="downloading..."
+        ) as bar:
+            if kind == "":
                 self.download(links, bar)
-            elif kind[:2] == 'th':
+            elif kind[:2] == "th":
                 self.download_th(links, bar, max_c)
-            elif kind[:2] == 'pr':
+            elif kind[:2] == "pr":
                 self.download_pr(links, bar, max_c)
             else:
                 return False
         return True
 
     def download(self, links: Iterable, bar: Callable):
-        """使用单线程下载，速度较慢
+        """
+        使用单线程下载，速度较慢
 
         Args:
             links: 链接的列表
@@ -55,8 +60,9 @@ class Scrap:
             self.handle(link=link, **self.link_kwargs)
             bar()
 
-    def download_th(self, links: Iterable, bar: Callable, max_c: int):
-        """使用多进程进行下载
+    def download_th(self, links: List[str], bar: Callable, max_c: int):
+        """
+        使用多线程进行下载, 使用信号量来进行线程和进度条的同步
 
         Args:
             links: 链接的列表
@@ -65,19 +71,23 @@ class Scrap:
 
         """
         with ThreadPoolExecutor(max_workers=max_c) as pool:
-            tasks = []
+            tasks, complete = [], Semaphore(0)
             for link in links:
-                tasks.append(pool.submit(
-                    self.handle,
-                    link=link,
-                    **self.link_kwargs,
-                ))
-            for task in tasks:
-                task.result()
+                tasks.append(
+                    pool.submit(
+                        self.get_func(self.handle, complete.release),
+                        link=link,
+                        **self.link_kwargs
+                    )
+                )
+            for i in range(len(links)):
+                complete.acquire()
                 bar()
 
+    # TODO 使用信号量同步主线程中bar函数
     def download_pr(self, links: Iterable, bar: Callable, max_c: int):
-        """使用多进程进行下载
+        """
+        使用多进程进行下载
 
         Args:
             links: 链接的列表
@@ -90,21 +100,28 @@ class Scrap:
             for link in links:
                 tasks.append(
                     pool.apply_async(
-                        func=self.handle,
-                        args=(link, ),
-                        kwds=self.link_kwargs,
-                    ))
+                        func=self.handle, args=(link,), kwds=self.link_kwargs
+                    )
+                )
             for task in tasks:
                 task.get()
                 bar()
 
     def scrap(self) -> List[str]:
-        """从主页面中获取所有需要的资源，并返回所有需要处理的links
+        """
+        从主页面中获取所有需要的资源，并返回所有需要处理的links
 
         Returns: 返回链接列表
 
         """
         return []
+
+    def get_func(self, func: Callable, sign_func: Callable):
+        def wrapper(link: str, **kwargs):
+            func(link, **kwargs)
+            sign_func()
+
+        return wrapper
 
     @staticmethod
     def handle(link: str, **kwargs):
